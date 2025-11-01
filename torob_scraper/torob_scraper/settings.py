@@ -85,3 +85,20 @@ DOWNLOAD_DELAY = 1
 
 # Set settings whose default value is deprecated to a future-proof value
 FEED_EXPORT_ENCODING = "utf-8"
+# settings.py
+BOT_NAME = 'torob_scraper'
+SPIDER_MODULES = ['torob_scraper.spiders']
+NEWSPIDER_MODULE = 'torob_scraper.spiders'
+
+ROBOTSTXT_OBEY = False
+DOWNLOAD_DELAY = 1
+
+# --- خروجی زیبا JSON ---
+FEED_EXPORT_INDENT = 2
+FEEDS = {
+    'output.json': {
+        'format': 'json',
+        'encoding': 'utf8',
+        'indent': 2,
+    },
+}
