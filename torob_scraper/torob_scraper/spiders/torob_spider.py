@@ -15,23 +15,19 @@ class TorobSearchSpider(scrapy.Spider):
         self.start_urls = [f"https://torob.com/search/?query={urllib.parse.quote(query)}"]
 
     def parse(self, response):
-        # اولین محصول در نتایج جستجو
         first_product = response.css('a[href*="/p/"]::attr(href)').get()
         if not first_product:
             yield {"error": "محصولی یافت نشد"}
             return
 
-        # رفتن به صفحه محصول
         product_url = response.urljoin(first_product)
         yield scrapy.Request(product_url, callback=self.parse_product)
 
     def parse_product(self, response):
         item = {}
 
-        # ۱. اسم محصول
         item["name"] = response.css('.Showcase_name__hrttI h1::text').get(default="").strip()
 
-        # ۲. کمترین قیمت + فروشگاه + لینک
         cheapest = {}
         seller_link = response.css('div.Showcase_cheapest_seller__TJpf9 a::attr(href)').get()
         if seller_link:
@@ -40,7 +36,6 @@ class TorobSearchSpider(scrapy.Spider):
             price_text = response.css('div.Showcase_buy_box_text__otYW_:last-child::text').get(default="")
             cheapest["price_text"] = price_text.strip()
 
-            # تبدیل قیمت به عدد (مثلاً "۴۸٫۹۹۰٫۰۰۰ تومان" → 48990000)
             price_match = re.search(r'[\d,]+', price_text.replace('٫', ''))
             if price_match:
                 cheapest["price"] = int(price_match.group().replace(',', ''))
@@ -51,10 +46,8 @@ class TorobSearchSpider(scrapy.Spider):
 
         item["cheapest"] = cheapest
 
-        # ۳. مشخصات
         specs = {"key_specs": [], "general_specs": {}}
 
-        # مشخصات کلیدی (اگر وجود داشته باشه)
         key_specs = response.css('div.key_specs .key-specs-container')
         for spec in key_specs:
             title = spec.css('.keys-values span::text').get(default="").strip()
@@ -62,7 +55,6 @@ class TorobSearchSpider(scrapy.Spider):
             if title and value:
                 specs["key_specs"].append({"title": title, "value": value})
 
-        # مشخصات کلی
         general_specs = response.css('div.sub-section .detail-title')
         for title_el in general_specs:
             title = title_el.css('::text').get(default="").strip()
@@ -73,5 +65,4 @@ class TorobSearchSpider(scrapy.Spider):
 
         item["specs"] = specs
 
-        # خروجی نهایی
         yield item

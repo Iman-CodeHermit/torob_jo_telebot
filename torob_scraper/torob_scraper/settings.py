@@ -93,7 +93,6 @@ NEWSPIDER_MODULE = 'torob_scraper.spiders'
 ROBOTSTXT_OBEY = False
 DOWNLOAD_DELAY = 1
 
-# --- خروجی زیبا JSON ---
 FEED_EXPORT_INDENT = 2
 FEEDS = {
     'output.json': {
